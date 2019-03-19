@@ -30,7 +30,24 @@ export class Core {
     update() {
         let time = new Date().getTime();
         if (time - this.timeStamp >= this.frameRate) {
-            this.timeStamp = time;
+            // Updates
+            Entity.activeList.forEach(instance => {
+                instance.update();
+            });
+            // Render submissions
+            Entity.activeList.forEach(instance => {
+                instance.render();
+            });
+            // Render
+            if (this.context != null && this.target != null) {
+                this.timeStamp = time;
+                // Clear the canvas
+                this.context.clearRect(0, 0, this.target.width, this.target.height);
+                // Draw all batch orders
+                Core.batch.forEach(submission => {
+                    this.drawSprite(submission.sprite, submission.x, submission.y);
+                });
+            }
         }
         window.requestAnimationFrame(this.update.bind(this));
     }
@@ -40,7 +57,13 @@ export class Core {
         }
     }
 }
+Core.batch = [];
 // Classes
+export class Render {
+    static submitSprite(sprite, x, y) {
+        Core.batch.push({ sprite, x, y });
+    }
+}
 export class Sprite {
     // Methods
     constructor(name) {
@@ -78,3 +101,27 @@ export class Sprite {
         });
     }
 }
+export class Entity {
+    // Internal
+    constructor() {
+        this.sprite = null;
+        this.x = 0;
+        this.y = 0;
+        Entity.activeList.push(this);
+    }
+    // Methods
+    initiate() { }
+    ;
+    update() { }
+    ;
+    render() {
+        this.drawSelf();
+    }
+    drawSelf() {
+        if (this.sprite != null) {
+            Render.submitSprite(this.sprite, this.x, this.y);
+        }
+    }
+}
+// Properties
+Entity.activeList = [];

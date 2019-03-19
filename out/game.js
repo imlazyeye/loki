@@ -15,9 +15,21 @@ function gameInitialize() {
         const core = new Engine.Core('main', 60);
         // Load in assets
         console.log('Loading assets...');
+        // Define player sprite
         const playerSpr = yield Engine.Sprite.create('Player', 'assets/sprites/sprPlayer.png');
-        // Add a sprite to the batch
-        core.drawSprite(playerSpr, 0, 0);
+        // Define the player
+        class Player extends Engine.Entity {
+            initiate() {
+                this.sprite = playerSpr;
+                this.x = 10;
+                this.y = 50;
+            }
+            update() {
+                this.x += 0.05;
+            }
+        }
+        const player = new Player();
+        player.initiate();
         // Begin the updates
         core.update();
     });
