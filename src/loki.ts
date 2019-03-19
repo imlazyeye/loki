@@ -25,7 +25,7 @@ export class Core {
 	constructor(canvas: string, frameRate: number) {
 
 		// Properties
-		this.scale = 8;
+		this.scale = 3;
 		this.target = <HTMLCanvasElement> document.getElementById(canvas);
 		this.context = null;
 		if (this.target != null) {
@@ -52,6 +52,16 @@ export class Core {
 				instance.update();
 			});
 
+			// Depth sort
+			function compare(a: Entity, b: Entity) {
+				if (a.depth > b.depth) {
+					return 1;
+				} else {
+					return -1;
+				}
+			}
+			Entity.activeList.sort(compare);
+
 			// Render submissions
 			Entity.activeList.forEach(instance => {
 				instance.render();
@@ -68,6 +78,9 @@ export class Core {
 				Core.batch.forEach(submission => {
 					this.drawSprite(submission.sprite, submission.x, submission.y);
 				});
+
+				// Empty the array
+				Core.batch = [];
 			}
 		}
 		window.requestAnimationFrame(this.update.bind(this));
@@ -88,7 +101,6 @@ export class Render {
 export class Sprite {
 	
 	// Properties
-	public name: string;
 	public asset: HTMLImageElement;
 	public loaded: boolean;
 	public width: number;
@@ -96,8 +108,7 @@ export class Sprite {
 	public bounds: bbox;
 
 	// Methods
-	private constructor(name: string) {
-		this.name = name;
+	private constructor() {
 		this.asset = new Image();
 		this.loaded = false;
 		this.width = 0;
@@ -110,8 +121,8 @@ export class Sprite {
 		}
 	}
 
-	public static async create(name: string, path: string) {
-		const mySprite = new Sprite(name);
+	public static async create(path: string) {
+		const mySprite = new Sprite();
 		await mySprite.loadImage(path);
 		return mySprite;
 	}
@@ -137,13 +148,16 @@ export abstract class Entity {
 	public sprite: Sprite | null;
 	public x: number;
 	public y: number;
+	public depth: number;
 
 	// Internal
-	constructor() {
+	constructor(x: number = 0, y: number = 0) {
 		this.sprite = null;
-		this.x = 0;
-		this.y = 0;
+		this.x = x;
+		this.y = y;
+		this.depth = 0;
 		Entity.activeList.push(this);
+		this.initiate();
 	}
 	
 

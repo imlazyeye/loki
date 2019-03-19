@@ -11,7 +11,7 @@ export class Core {
     // Init function
     constructor(canvas, frameRate) {
         // Properties
-        this.scale = 8;
+        this.scale = 3;
         this.target = document.getElementById(canvas);
         this.context = null;
         if (this.target != null) {
@@ -34,6 +34,16 @@ export class Core {
             Entity.activeList.forEach(instance => {
                 instance.update();
             });
+            // Depth sort
+            function compare(a, b) {
+                if (a.depth > b.depth) {
+                    return 1;
+                }
+                else {
+                    return -1;
+                }
+            }
+            Entity.activeList.sort(compare);
             // Render submissions
             Entity.activeList.forEach(instance => {
                 instance.render();
@@ -47,6 +57,8 @@ export class Core {
                 Core.batch.forEach(submission => {
                     this.drawSprite(submission.sprite, submission.x, submission.y);
                 });
+                // Empty the array
+                Core.batch = [];
             }
         }
         window.requestAnimationFrame(this.update.bind(this));
@@ -66,8 +78,7 @@ export class Render {
 }
 export class Sprite {
     // Methods
-    constructor(name) {
-        this.name = name;
+    constructor() {
         this.asset = new Image();
         this.loaded = false;
         this.width = 0;
@@ -79,9 +90,9 @@ export class Sprite {
             bottom: 0
         };
     }
-    static create(name, path) {
+    static create(path) {
         return __awaiter(this, void 0, void 0, function* () {
-            const mySprite = new Sprite(name);
+            const mySprite = new Sprite();
             yield mySprite.loadImage(path);
             return mySprite;
         });
@@ -103,11 +114,13 @@ export class Sprite {
 }
 export class Entity {
     // Internal
-    constructor() {
+    constructor(x = 0, y = 0) {
         this.sprite = null;
-        this.x = 0;
-        this.y = 0;
+        this.x = x;
+        this.y = y;
+        this.depth = 0;
         Entity.activeList.push(this);
+        this.initiate();
     }
     // Methods
     initiate() { }

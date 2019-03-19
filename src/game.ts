@@ -9,22 +9,35 @@ async function gameInitialize() {
   // Load in assets
   console.log('Loading assets...');
   
-  // Define player sprite
-  const playerSpr = await Engine.Sprite.create('Player', 'assets/sprites/sprPlayer.png');
+  // Define sprites
+  const playerSpr = await Engine.Sprite.create('assets/sprites/sprPlayer.png');
+  const treeSpr = await Engine.Sprite.create('assets/sprites/sprTree.png');
 
   // Define the player
   class Player extends Engine.Entity {
     initiate() {
       this.sprite = playerSpr;
-      this.x = 10;
-      this.y = 50;
     }
     update() {
-      this.x += 0.05;
+      this.y += 0.5;
+      this.x += 0.5;
+      this.depth = -this.y;
     }
   }
-  const player = new Player();
-  player.initiate();
+  const player = new Player(50);
+
+  // Define a tree
+  class Tree extends Engine.Entity {
+    sprite = treeSpr;
+    update() {
+      this.depth = this.y;
+    }
+  }
+  for (let i = 0; i < 50; ++i) {
+    let x = Math.random() * Math.floor(300);
+    let y = Math.random() * Math.floor(300);
+    new Tree(x, y);
+  }
 
   // Begin the updates
   core.update();
